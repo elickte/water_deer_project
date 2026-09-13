@@ -24,23 +24,38 @@
             z-index: 10;
         }
 
-        .settings-btn {
+        .top-btn-group {
             position: absolute;
             top: 10px;
             right: 10px;
-            background: none;
-            border: none;
-            cursor: pointer;
+            display: flex;
+            gap: 4px;
             z-index: 10;
+        }
+
+        .icon-btn {
+            background: white;
+            border: 1px solid black;
+            padding: 2px 6px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .game-screen {
             width: 100%;
             height: 200px;
-            display: flex;
+            margin-top: 40px;
+            display: none;
             justify-content: center;
             align-items: center;
-            margin-top: 40px;
+            flex-direction: column;
+        }
+
+        .game-screen.active {
+            display: flex;
         }
 
         .game-screen img {
@@ -61,6 +76,11 @@
             background: white;
             cursor: pointer;
             margin-left: -1px;
+        }
+
+        .tab-group button.active-btn {
+            font-weight: bold;
+            background: #eee;
         }
 
         .info-group {
@@ -94,19 +114,24 @@
     <div class="game-container">
         <div class="fruit-box">열매 12,345</div>
         
-        <button class="settings-btn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2">
-                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
-                <circle cx="12" cy="12" r="3"/>
-            </svg>
-        </button>
+        <div class="top-btn-group">
+            <button class="icon-btn" onclick="openTab('tab-main', null)">홈</button>
+            <button class="icon-btn">
+                <img src="https://svgsilh.com/svg/147414.svg" width="16" height="16" alt="설정">
+            </button>
+        </div>
 
-        <div class="game-screen">
-            <img src="https://svgsilh.com/svg/47343.svg" alt="고라니">
+        <div id="tab-main" class="game-screen active">
+            <img src="https://www.svgrepo.com/show/396279/deer.svg" alt="고라니">
+        </div>
+
+        <div id="tab-upgrade" class="game-screen">
+            <p style="font-size: 16px; font-weight: bold;">강화 메뉴</p>
+            <p style="font-size: 12px; margin-top: 6px;">클릭당 열매 증가 등 강화 기능</p>
         </div>
 
         <div class="tab-group">
-            <button>강화</button>
+            <button onclick="openTab('tab-upgrade', this)">강화</button>
             <button>동료</button>
             <button>펫</button>
             <button>스킨</button>
@@ -115,20 +140,36 @@
         </div>
 
         <div class="info-group">
-            <div class="info-card" id="click-berry">
+            <div class="info-card">
                 <span class="title">클릭당 열매</span>
                 <span class="value">10</span>
             </div>
-            <div class="info-card" id="auto-berry">
+            <div class="info-card">
                 <span class="title">초당 열매</span>
                 <span class="value">50</span>
             </div>
-            <div class="info-card" id="sum-berry">
+            <div class="info-card">
                 <span class="title">총 열매 생산량</span>
                 <span class="value">1,234</span>
             </div>
         </div>
     </div>
+
+    <script>
+        function openTab(tabId, btnElement) {
+            const screens = document.querySelectorAll('.game-screen');
+            screens.forEach(screen => screen.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.tab-group button');
+            buttons.forEach(btn => btn.classList.remove('active-btn'));
+
+            document.getElementById(tabId).classList.add('active');
+            
+            if (btnElement) {
+                btnElement.classList.add('active-btn');
+            }
+        }
+    </script>
 
 </body>
 </html>
