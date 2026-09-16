@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <title>고라니 키우기</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         .game-container {
             position: relative;
@@ -49,9 +54,8 @@
             height: 200px;
             margin-top: 40px;
             display: none;
-            justify-content: center;
-            align-items: center;
             flex-direction: column;
+            overflow-y: auto;
         }
 
         .game-screen.active {
@@ -66,7 +70,7 @@
 
         .tab-group {
             display: flex;
-            margin-top: 10px; 
+            margin-top: 10px;
         }
 
         .tab-group button {
@@ -107,50 +111,310 @@
             font-size: 14px;
             font-weight: bold;
         }
+
+        .btn-action {
+            background: white;
+            border: 1px solid black;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-action:hover {
+            background: #eee;
+        }
+
+        .setting-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            gap: 8px;
+        }
+
+        .setting-left {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .setting-right {
+            flex: 1;
+            border: 1px solid black;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: center;
+        }
+
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .upgrade-layout {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            height: 100%;
+            padding: 0 10px;
+        }
+
+        .upgrade-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid black;
+            padding: 8px;
+            margin-bottom: 6px;
+        }
+
+        .list-item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 12px;
+        }
+
+        .skin-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            width: 100%;
+        }
+
+        .skin-card {
+            border: 1px solid black;
+            padding: 6px;
+            text-align: center;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .map-section {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .map-section-title {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .map-card-main {
+            border: 1px solid black;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .map-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+        }
+
+        .map-card {
+            border: 1px solid black;
+            padding: 8px 4px;
+            text-align: center;
+            font-size: 11px;
+        }
     </style>
 </head>
+
 <body>
 
     <div class="game-container">
-        <div class="fruit-box">열매 12,345</div>
-        
+        <div class="fruit-box" id="berry">열매 0</div>
+
         <div class="top-btn-group">
             <button class="icon-btn" onclick="openTab('tab-main', null)">홈</button>
-            <button class="icon-btn">
+            <button class="icon-btn" onclick="openTab('tab-suljung', null)">
                 <img src="https://svgsilh.com/svg/147414.svg" width="16" height="16" alt="설정">
             </button>
         </div>
 
-        <div id="tab-main" class="game-screen active">
-            <img src="https://www.svgrepo.com/show/396279/deer.svg" alt="고라니">
+        <div id="tab-main" class="game-screen active" style="justify-content: center; align-items: center;">
+            <img src="https://www.svgrepo.com/show/396279/deer.svg" alt="고라니" onclick="clickDeer()">
+        </div>
+
+        <div id="tab-suljung" class="game-screen">
+            <div class="setting-layout">
+                <div class="setting-left">
+                    <button class="btn-action">세이브 데이터 내보내기</button>
+                    <button class="btn-action">세이브 데이터 불러오기</button>
+                    <button class="btn-action" style="color: red;">데이터 초기화</button>
+                </div>
+                <div class="setting-right">
+                    <p style="font-weight: bold; font-size: 13px;">게임 설정</p>
+                    <div class="toggle-row">
+                        <span>배경음</span>
+                        <button class="btn-action">ON</button>
+                    </div>
+                    <div class="toggle-row">
+                        <span>효과음</span>
+                        <button class="btn-action">ON</button>
+                    </div>
+                    <div style="font-size: 11px; margin-top: 8px;">
+                        버전 정보<br>v1.0.0
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="tab-upgrade" class="game-screen">
-            <p style="font-size: 16px; font-weight: bold;">강화 메뉴</p>
-            <p style="font-size: 12px; margin-top: 6px;">클릭당 열매 증가 등 강화 기능</p>
+            <div class="upgrade-layout">
+                <div class="upgrade-info">
+                    <p style="font-weight: bold; font-size: 15px;">고라니 Lv. 1</p>
+                    <p style="font-size: 12px;">클릭당 열매</p>
+                </div>
+                <button class="btn-action" style="padding: 12px 16px;">
+                    강화하기<br>열매 100
+                </button>
+            </div>
+        </div>
+
+        <div id="tab-member" class="game-screen">
+            <div class="list-item">
+                <div class="list-item-info">
+                    <span style="font-weight: bold;">아기 고라니</span>
+                    <span>초당 열매 +1</span>
+                </div>
+                <button class="btn-action">구매 </button>
+            </div>
+            <div class="list-item">
+                <div class="list-item-info">
+                    <span style="font-weight: bold;">뿔 고라니</span>
+                    <span>초당 열매 +5</span>
+                </div>
+                <button class="btn-action">구매 </button>
+            </div>
+        </div>
+
+        <div id="tab-pet" class="game-screen">
+            <div class="list-item">
+                <div class="list-item-info">
+                    <span style="font-weight: bold;">병아리</span>
+                    <span>클릭 열매 +10%</span>
+                </div>
+                <button class="btn-action">구매</button>
+            </div>
+            <div class="list-item">
+                <div class="list-item-info">
+                    <span style="font-weight: bold;">람쥐</span>
+                    <span>초당 열매 +15%</span>
+                </div>
+                <button class="btn-action">구매 </button>
+            </div>
+        </div>
+
+        <div id="tab-skin" class="game-screen">
+            <div class="skin-grid">
+                <div class="skin-card">
+                    <span>기본</span>
+                    <button class="btn-action" style="width: 100%;">적용중</button>
+                </div>
+                <div class="skin-card">
+                    <span>왕 고라니</span>
+                    <button class="btn-action" style="width: 100%;">열매 500</button>
+                </div>
+                <div class="skin-card">
+                    <span>선글라스</span>
+                    <button class="btn-action" style="width: 100%;">열매 700</button>
+                </div>
+                <div class="skin-card">
+                    <span>수영복</span>
+                    <button class="btn-action" style="width: 100%;">열매 1000</button>
+                </div>
+                <div class="skin-card">
+                    <span>산타</span>
+                    <button class="btn-action" style="width: 100%;">열매 1200</button>
+                </div>
+                <div class="skin-card">
+                    <span>우주</span>
+                    <button class="btn-action" style="width: 100%;">열매 1500</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-map" class="game-screen">
+            <div class="map-section">
+                <div class="map-section-title">현재 맵</div>
+                <div class="map-card-main">숲속 (선택됨)</div>
+            </div>
+            <div class="map-section">
+                <div class="map-section-title">맵</div>
+                <div class="map-grid">
+                    <div class="map-card">
+                        <p style="font-weight: bold;">초원</p>
+                        <button class="btn-action" style="margin-top: 4px; width: 100%;">이동</button>
+                    </div>
+                    <div class="map-card">
+                        <p style="font-weight: bold;">사막</p>
+                        <p style="font-size: 9px;">조건: Lv.10</p>
+                    </div>
+                    <div class="map-card">
+                        <p style="font-weight: bold;">눈발</p>
+                        <p style="font-size: 9px;">조건: Lv.20</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-shop" class="game-screen">
+            <div class="list-item">
+                <div class="list-item-info">
+                    <span style="font-weight: bold;">열매 2배 부스터</span>
+                </div>
+                <button class="btn-action">구매 </button>
+            </div>
+            <div class="list-item">
+                <div class="list-item-info">
+                    <span style="font-weight: bold;">이주호 </span>
+                </div>
+                <button class="btn-action">구매</button>
+            </div>
         </div>
 
         <div class="tab-group">
             <button onclick="openTab('tab-upgrade', this)">강화</button>
-            <button>동료</button>
-            <button>펫</button>
-            <button>스킨</button>
-            <button>맵</button>
-            <button>상점</button>
+            <button onclick="openTab('tab-member', this)">동료</button>
+            <button onclick="openTab('tab-pet', this)">펫</button>
+            <button onclick="openTab('tab-skin', this)">스킨</button>
+            <button onclick="openTab('tab-map', this)">맵</button>
+            <button onclick="openTab('tab-shop', this)">상점</button>
         </div>
 
         <div class="info-group">
-            <div class="info-card">
+            <div class="info-card" id="click_berry">
                 <span class="title">클릭당 열매</span>
-                <span class="value">10</span>
+                <span class="value">1</span>
             </div>
-            <div class="info-card">
+            <div class="info-card" id="auto_berry">
                 <span class="title">초당 열매</span>
-                <span class="value">50</span>
+                <span class="value">0</span>
             </div>
-            <div class="info-card">
+            <div class="info-card" id="sum_berry">
                 <span class="title">총 열매 생산량</span>
-                <span class="value">1,234</span>
+                <span class="value">0</span>
             </div>
         </div>
     </div>
@@ -164,12 +428,13 @@
             buttons.forEach(btn => btn.classList.remove('active-btn'));
 
             document.getElementById(tabId).classList.add('active');
-            
+
             if (btnElement) {
                 btnElement.classList.add('active-btn');
             }
         }
     </script>
-
+    <script src="./main.js"></script>
 </body>
+
 </html>
