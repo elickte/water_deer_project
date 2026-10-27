@@ -252,11 +252,13 @@
             </button>
         </div>
 
-        <div id="tab-main" class="game-screen active" style="justify-content: center; align-items: center;">
+        <img src="https://media.istockphoto.com/id/1326389468/vector/beautiful-sunlit-forest.jpg?s=612x612&w=0&k=20&c=ik0tGlKOhIY4w85MvSnhgF05MogXxP2CDDBbHb-d57M=" alt="배경" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" id="background-img">
+
+        <div id="tab-main" class="game-screen active" style="justify-content: center; align-items: center; position: relative; z-index: 1;">
             <img src="https://www.svgrepo.com/show/396279/deer.svg" alt="고라니" onclick="clickDeer()">
         </div>
 
-        <div id="tab-suljung" class="game-screen">
+        <div id="tab-suljung" class="game-screen" style="position: relative; z-index: 1; background: white;">
             <div class="setting-layout">
                 <div class="setting-left">
                     <button class="btn-action">세이브 데이터 내보내기</button>
@@ -280,7 +282,7 @@
             </div>
         </div>
 
-        <div id="tab-upgrade" class="game-screen">
+        <div id="tab-upgrade" class="game-screen" style="position: relative; z-index: 1; background: white;">
             <div class="upgrade-layout">
                 <div class="upgrade-info">
                     <p style="font-weight: bold; font-size: 15px;">고라니 Lv. 1</p>
@@ -292,7 +294,7 @@
             </div>
         </div>
 
-        <div id="tab-member" class="game-screen">
+        <div id="tab-member" class="game-screen" style="position: relative; z-index: 1; background: white;">
             <div class="list-item">
                 <div class="list-item-info">
                     <span style="font-weight: bold;">아기 고라니</span>
@@ -309,7 +311,7 @@
             </div>
         </div>
 
-        <div id="tab-pet" class="game-screen">
+        <div id="tab-pet" class="game-screen" style="position: relative; z-index: 1; background: white;">
             <div class="list-item">
                 <div class="list-item-info">
                     <span style="font-weight: bold;">병아리</span>
@@ -326,7 +328,7 @@
             </div>
         </div>
 
-        <div id="tab-skin" class="game-screen">
+        <div id="tab-skin" class="game-screen" style="position: relative; z-index: 1; background: white;">
             <div class="skin-grid">
                 <div class="skin-card">
                     <span>기본</span>
@@ -355,7 +357,7 @@
             </div>
         </div>
 
-        <div id="tab-map" class="game-screen">
+        <div id="tab-map" class="game-screen" style="position: relative; z-index: 1; background: white;">
             <div class="map-section">
                 <div class="map-section-title">현재 맵</div>
                 <div class="map-card-main">숲속 (선택됨)</div>
@@ -379,7 +381,7 @@
             </div>
         </div>
 
-        <div id="tab-shop" class="game-screen">
+        <div id="tab-shop" class="game-screen" style="position: relative; z-index: 1; background: white;">
             <div class="list-item">
                 <div class="list-item-info">
                     <span style="font-weight: bold;">열매 2배 부스터</span>
@@ -392,9 +394,9 @@
                 </div>
                 <button class="btn-action">구매</button>
             </div>
-        </div>
-
-        <div class="tab-group">
+        </div> 
+        
+        <div class="tab-group" style="position: relative; z-index: 1; background: white;">
             <button onclick="openTab('tab-upgrade', this)">강화</button>
             <button onclick="openTab('tab-member', this)">동료</button>
             <button onclick="openTab('tab-pet', this)">펫</button>
@@ -403,7 +405,7 @@
             <button onclick="openTab('tab-shop', this)">상점</button>
         </div>
 
-        <div class="info-group">
+        <div class="info-group" style="position: relative; z-index: 1;">
             <div class="info-card" id="click_berry">
                 <span class="title">클릭당 열매</span>
                 <span class="value">1</span>
