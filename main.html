@@ -359,111 +359,110 @@
         </div>
 
         <div id="tab-suljung" class="game-screen" style="position: relative; z-index: 1; background: white;">
-            <div id="tab-suljung" class="game-screen" style="position: relative; z-index: 1; background: white;">
-                <div class="setting-layout">
-                    <div class="setting-left">
-                        <button class="btn-action">세이브 데이터 내보내기</button>
-                        <button class="btn-action">세이브 데이터 불러오기</button>
-                        <button class="btn-action" style="color: red;">데이터 초기화</button>
+
+            <div class="setting-layout">
+                <div class="setting-left">
+                    <button class="btn-action">세이브 데이터 내보내기</button>
+                    <button class="btn-action">세이브 데이터 불러오기</button>
+                    <button class="btn-action" style="color: red;">데이터 초기화</button>
+                </div>
+                <div class="setting-right">
+                    <p style="font-weight: bold; font-size: 13px;">게임 설정</p>
+                    <div class="toggle-row">
+                        <span>배경음</span>
+                        <button class="btn-action">ON</button>
                     </div>
-                    <div class="setting-right">
-                        <p style="font-weight: bold; font-size: 13px;">게임 설정</p>
-                        <div class="toggle-row">
-                            <span>배경음</span>
-                            <button class="btn-action">ON</button>
-                        </div>
-                        <div class="toggle-row">
-                            <span>효과음</span>
-                            <button class="btn-action">ON</button>
-                        </div>
-                        <div style="font-size: 11px; margin-top: 8px;">
-                            버전 정보<br>v1.0.0
-                        </div>
+                    <div class="toggle-row">
+                        <span>효과음</span>
+                        <button class="btn-action">ON</button>
+                    </div>
+                    <div style="font-size: 11px; margin-top: 8px;">
+                        버전 정보<br>v1.0.0
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- 2. 강화 -->
-            <div id="tab-upgrade" class="game-screen" style="position: relative; z-index: 1; background: white;">
-                <div class="upgrade-layout">
-                    <div class="upgrade-info">
-                        <p id="upgrade-level" style="font-weight: bold; font-size: 15px;">고라니 Lv. 1</p>
-                        <p id="upgrade-desc" style="font-size: 12px;">클릭당 열매</p>
-                    </div>
-                    <button id="upgrade-btn" class="btn-action" style="padding: 12px 16px;" onclick="upgradeDeer()">
-                        강화하기<br>열매 10
-                    </button>
+        <!-- 2. 강화 -->
+        <div id="tab-upgrade" class="game-screen" style="position: relative; z-index: 1; background: white;">
+            <div class="upgrade-layout">
+                <div class="upgrade-info">
+                    <p id="upgrade-level" style="font-weight: bold; font-size: 15px;">고라니 Lv. 1</p>
+                    <p id="upgrade-desc" style="font-size: 12px;">클릭당 열매</p>
                 </div>
+                <button id="upgrade-btn" class="btn-action" style="padding: 12px 16px;" onclick="upgradeDeer()">
+                    강화하기<br>열매 10
+                </button>
             </div>
+        </div>
 
-            <!-- 3.1 동료 / 3.2 펫 : 목록은 main.js 의 render() 가 채움 -->
-            <div id="tab-member" class="game-screen" style="position: relative; z-index: 1; background: white;"></div>
+        <!-- 3.1 동료 / 3.2 펫 : 목록은 main.js 의 render() 가 채움 -->
+        <div id="tab-member" class="game-screen" style="position: relative; z-index: 1; background: white;"></div>
 
-            <div id="tab-pet" class="game-screen" style="position: relative; z-index: 1; background: white;"></div>
+        <div id="tab-pet" class="game-screen" style="position: relative; z-index: 1; background: white;"></div>
 
-            <!-- 5. 스킨 -->
-            <div id="tab-skin" class="game-screen" style="position: relative; z-index: 1; background: white;">
-                <div class="skin-grid" id="skin-grid"></div>
+        <!-- 5. 스킨 -->
+        <div id="tab-skin" class="game-screen" style="position: relative; z-index: 1; background: white;">
+            <div class="skin-grid" id="skin-grid"></div>
+        </div>
+
+        <!-- 6. 맵 -->
+        <div id="tab-map" class="game-screen" style="position: relative; z-index: 1; background: white;">
+            <div class="map-section">
+                <div class="map-section-title">현재 맵</div>
+                <div class="map-card-main" id="map-current">숲 (선택됨)</div>
             </div>
+            <div class="map-section">
+                <div class="map-section-title">맵</div>
+                <div class="map-grid" id="map-grid"></div>
+            </div>
+        </div>
 
-            <!-- 6. 맵 -->
-            <div id="tab-map" class="game-screen" style="position: relative; z-index: 1; background: white;">
-                <div class="map-section">
-                    <div class="map-section-title">현재 맵</div>
-                    <div class="map-card-main" id="map-current">숲 (선택됨)</div>
+        <!-- 상점 -->
+        <div id="tab-shop" class="game-screen" style="position: relative; z-index: 1; background: white;">
+            <div class="list-item">
+                <div class="list-item-info">
+                    <span style="font-weight: bold;">열매 2배 부스터</span>
+                    <span class="desc" id="booster-desc">30초 동안 모든 열매 2배</span>
                 </div>
-                <div class="map-section">
-                    <div class="map-section-title">맵</div>
-                    <div class="map-grid" id="map-grid"></div>
-                </div>
+                <button class="btn-action" id="booster-btn" onclick="buyBooster()">구매<br>500</button>
             </div>
-
-            <!-- 상점 -->
-            <div id="tab-shop" class="game-screen" style="position: relative; z-index: 1; background: white;">
-                <div class="list-item">
-                    <div class="list-item-info">
-                        <span style="font-weight: bold;">열매 2배 부스터</span>
-                        <span class="desc" id="booster-desc">30초 동안 모든 열매 2배</span>
-                    </div>
-                    <button class="btn-action" id="booster-btn" onclick="buyBooster()">구매<br>500</button>
+            <div class="list-item">
+                <div class="list-item-info">
+                    <span style="font-weight: bold;">이주호</span>
+                    <span class="desc">랜덤으로 열매를 줌 (꽝 있음)</span>
                 </div>
-                <div class="list-item">
-                    <div class="list-item-info">
-                        <span style="font-weight: bold;">이주호</span>
-                        <span class="desc">랜덤으로 열매를 줌 (꽝 있음)</span>
-                    </div>
-                    <button class="btn-action" id="juho-btn" onclick="buyJuho()">구매<br>100</button>
-                </div>
+                <button class="btn-action" id="juho-btn" onclick="buyJuho()">구매<br>100</button>
             </div>
+        </div>
 
-            <div class="tab-group" style="position: relative; z-index: 1; background: white;">
-                <button onclick="openTab('tab-upgrade', this)">강화</button>
-                <button onclick="openTab('tab-member', this)">동료</button>
-                <button onclick="openTab('tab-pet', this)">펫</button>
-                <button onclick="openTab('tab-skin', this)">스킨</button>
-                <button onclick="openTab('tab-map', this)">맵</button>
-                <button onclick="openTab('tab-shop', this)">상점</button>
+        <div class="tab-group" style="position: relative; z-index: 1; background: white;">
+            <button onclick="openTab('tab-upgrade', this)">강화</button>
+            <button onclick="openTab('tab-member', this)">동료</button>
+            <button onclick="openTab('tab-pet', this)">펫</button>
+            <button onclick="openTab('tab-skin', this)">스킨</button>
+            <button onclick="openTab('tab-map', this)">맵</button>
+            <button onclick="openTab('tab-shop', this)">상점</button>
+        </div>
+
+        <div class="info-group" style="position: relative; z-index: 1;">
+            <div class="info-card" id="click_berry">
+                <span class="title">클릭당 열매</span>
+                <span class="value">1</span>
             </div>
-
-            <div class="info-group" style="position: relative; z-index: 1;">
-                <div class="info-group" style="position: relative; z-index: 1;">
-                    <div class="info-card" id="click_berry">
-                        <span class="title">클릭당 열매</span>
-                        <span class="value">1</span>
-                    </div>
-                    <div class="info-card" id="auto_berry">
-                        <span class="title">초당 열매</span>
-                        <span class="value">0</span>
-                    </div>
-                    <div class="info-card" id="sum_berry">
-                        <span class="title">총 열매 생산량</span>
-                        <span class="value">0</span>
-                    </div>
-                </div>
+            <div class="info-card" id="auto_berry">
+                <span class="title">초당 열매</span>
+                <span class="value">0</span>
             </div>
+            <div class="info-card" id="sum_berry">
+                <span class="title">총 열매 생산량</span>
+                <span class="value">0</span>
+            </div>
+        </div>
+    </div>
 
-            <!-- openTab 포함 모든 JS 는 main.js 에 있음 -->
-            <script src="./main.js"></script>
+    <!-- openTab 포함 모든 JS 는 main.js 에 있음 -->
+    <script src="./main.js"></script>
 </body>
 
 </html>
