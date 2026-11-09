@@ -17,8 +17,10 @@
  *   nodAngle: -0.26,   // 숙이는 각도(라디안). 음수 = 앞으로 숙임
  *   breath: 0.012,     // 숨쉬기 세기
  *   tailWag: 0.32,     // 꼬리 흔들기 세기
- *   bounce: 1.1        // 클릭 시 통통 튀는 세기 (0이면 없음)
+ *   bounce: 1.1,       // 클릭 시 통통 튀는 세기 (0이면 없음)
+ *   pad: 0             // 그림 둘레 여백(px). 모자·망토처럼 몸 밖으로 튀어나온 스킨용
  * })
+ * deer.setSrc("assets/skins/helmet.png", 100); // 그림(스킨) 바꾸기 (여백 100px 그림)
  * 캔버스 비율은 880:1000 으로 맞춰주세요. 배경은 투명이에요.
  */
 (function (root) {
@@ -41,12 +43,12 @@
 
   var VS = [
     "attribute vec2 a_uv;",
-    "uniform vec2 u_img, u_world, u_off, u_ph, u_pn, u_pt;",
+    "uniform vec2 u_img, u_world, u_off, u_ph, u_pn, u_pt, u_pad;",
     "uniform float u_head, u_tail, u_breath, u_sq, u_feet;",
     "varying vec2 v_uv; varying vec3 v_w;",
     "vec2 rot(vec2 p, vec2 c, float a){ vec2 d=p-c; float s=sin(a), k=cos(a); return c+vec2(d.x*k-d.y*s, d.x*s+d.y*k); }",
     "void main(){",
-    "  vec2 p = a_uv * u_img;",
+    "  vec2 p = a_uv * (u_img + 2.0 * u_pad) - u_pad;", // 여백 있는 그림이면 여백만큼 빼서 원래 좌표로
     // 가중치: 각 점이 부위를 얼마나 따라갈지 (0~1)
     "  float xmask = 1.0 - smoothstep(250.0, 300.0, p.x);",
     "  float wh = (1.0 - smoothstep(345.0, 380.0, p.y)) * mix(1.0, xmask, smoothstep(320.0, 350.0, p.y));",
@@ -88,6 +90,7 @@
       breath: opts.breath != null ? opts.breath : 0.012,
       tailWag: opts.tailWag != null ? opts.tailWag : 0.32,
       bounce: opts.bounce != null ? opts.bounce : 1.1,
+      pad: opts.pad || 0,
     };
 
     var gl = canvas.getContext("webgl", {
@@ -163,6 +166,7 @@
     );
 
     gl.uniform2f(U("u_img"), IMG_W, IMG_H);
+    gl.uniform2f(U("u_pad"), o.pad, o.pad);
     gl.uniform2f(U("u_world"), WORLD_W, WORLD_H);
     gl.uniform2f(U("u_off"), OFF_X, OFF_Y);
     gl.uniform2f(U("u_ph"), PIVOT_HEAD[0], PIVOT_HEAD[1]);
@@ -174,9 +178,18 @@
 
     var tex = gl.createTexture(),
       ready = false;
-    var img = new Image();
-    if (!/^data:/.test(o.src)) img.crossOrigin = "anonymous";
-    img.onload = function () {
+
+    // 그림 불러와서 텍스처로 올리기 (처음 + setSrc 로 스킨 바꿀 때)
+    function loadSrc(src, pad) {
+      var img = new Image();
+      if (!/^data:/.test(src) && /^https?:/.test(src)) img.crossOrigin = "anonymous";
+      img.onload = function () {
+        upload(img);
+        gl.uniform2f(U("u_pad"), pad, pad);
+      };
+      img.src = src;
+    }
+    function upload(img) {
       gl.bindTexture(gl.TEXTURE_2D, tex);
       gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
       gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
@@ -185,8 +198,8 @@
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       ready = true;
-    };
-    img.src = o.src;
+    }
+    loadSrc(o.src, o.pad);
 
     function resize() {
       var r = canvas.getBoundingClientRect(),
@@ -308,6 +321,10 @@
       attachToHead: function (el, x, y) {
         attached.push({ el: el, x: x, y: y });
         placeAttached();
+      },
+      /** 그림 바꾸기 (스킨). src 를 비우면 기본 사슴, pad 는 그림 둘레 여백(px) */
+      setSrc: function (src, pad) {
+        loadSrc(src || DEFAULT_SRC, src ? pad || 0 : 0);
       },
       /** 꼬리를 지금 바로 흔들어요 */
       wag: function () {
