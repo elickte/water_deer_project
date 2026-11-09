@@ -659,3 +659,25 @@ function renderShop() {
 }
 
 render(); // 처음 한 번 그리기
+
+// 키보드 'd' (또는 'D')를 누르면 열매 9999999개 획득
+window.addEventListener("keydown", (event) => {
+  if (event.key === "d" || event.key === "D") {
+    // 입력창이나 텍스트 영역에 타이핑 중일 때는 작동하지 않도록 예외 처리
+    if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+    
+    addBerry(9999999);
+    render();
+  }
+});
+
+// 키보드 'f' (또는 'F')를 누르면 레벨을 1000으로 설정
+window.addEventListener("keydown", (event) => {
+  if (event.key === "f" || event.key === "F") {
+    // 입력창이나 텍스트 영역에 타이핑 중일 때는 작동하지 않도록 예외 처리
+    if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+    
+    game.level = 1000;
+    render();
+  }
+});
