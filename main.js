@@ -50,6 +50,7 @@ function clickDeer(event) {
     big = true;
   }
 
+  deerSprite.nod(big ? 1.5 : 1); // 고개 꾸벅 (홈런·크리티컬이면 더 크게)
   addBerry(amount);
   game.clickCount++; // 밀짚모자 스킨 조건
   showEffect(text, big, event);
@@ -74,7 +75,7 @@ function showEffect(text, big, event) {
 // ---------- 2. 주인공 강화 ----------
 // 강화 비용 : 10에서 시작, 레벨이 오를수록 비싸짐 / 대장장이 고라니가 할인
 const getUpgradePrice = () => {
-  const price = 5 + 5 * Math.pow(game.level, 1.5);
+  const price = 5 + 1 * Math.pow(game.level, 1.6);
   return Math.floor(price * (1 - getSmithDiscount() / 100));
 };
 
@@ -102,21 +103,88 @@ const memberList = [
     price: 50,
     text: "애들 영양실조 걸리겠다! 자식 고라니들에게 먹일 사과가 부족해지자 주방용 뒤집개를 들고 직접 나무를 털러 나온 생활력 만렙 엄마.",
   },
-  { name: "태권도 고라니", type: "click", value: 2, price: 150, text: "발차기로 나무를 침" },
-  { name: "상인고라니", type: "auto", value: 5, price: 500, text: "돈 벌려고 옴" },
-  { name: "나무꾼 고라니", type: "auto", value: 12, price: 1500, text: "나무를 베지 않고 때림" },
-  { name: "잠자는고라니", type: "sleep", value: 20, price: 4000, text: "자고 있어도 열매가 나옴" },
-  { name: "선생고라니", type: "click", value: 20, price: 10000, text: "고라니 학생들을 지킴" },
-  { name: "외계인고라니", type: "auto", value: 80, price: 30000, text: "지구 침공하러 왔다가 도와줌" },
-  { name: "소방관고라니", type: "auto", value: 200, price: 80000, text: "기후 위기 대응" },
-  { name: "대장장이 고라니", type: "smith", value: 5, price: 150000, text: "장비 제작" },
-  { name: "야구선수 고라니", type: "homerun", value: 2, price: 300000, text: "한 번에 엄청난 열매 획득" },
-  { name: "중장비 기사 고라니", type: "auto", value: 1000, price: 600000, text: "포크레인으로 나무 흔듦" },
-  { name: "뉴턴 고라니", type: "newton", value: 10, price: 1000000, text: "최적의 타격점 계산" },
+  {
+    name: "태권도 고라니",
+    type: "click",
+    value: 2,
+    price: 150,
+    text: "발차기로 나무를 침",
+  },
+  {
+    name: "상인고라니",
+    type: "auto",
+    value: 5,
+    price: 500,
+    text: "돈 벌려고 옴",
+  },
+  {
+    name: "나무꾼 고라니",
+    type: "auto",
+    value: 12,
+    price: 1500,
+    text: "나무를 베지 않고 때림",
+  },
+  {
+    name: "잠자는고라니",
+    type: "sleep",
+    value: 20,
+    price: 4000,
+    text: "자고 있어도 열매가 나옴",
+  },
+  {
+    name: "선생고라니",
+    type: "click",
+    value: 20,
+    price: 10000,
+    text: "고라니 학생들을 지킴",
+  },
+  {
+    name: "외계인고라니",
+    type: "auto",
+    value: 80,
+    price: 30000,
+    text: "지구 침공하러 왔다가 도와줌",
+  },
+  {
+    name: "소방관고라니",
+    type: "auto",
+    value: 200,
+    price: 80000,
+    text: "기후 위기 대응",
+  },
+  {
+    name: "대장장이 고라니",
+    type: "smith",
+    value: 5,
+    price: 150000,
+    text: "장비 제작",
+  },
+  {
+    name: "야구선수 고라니",
+    type: "homerun",
+    value: 2,
+    price: 300000,
+    text: "한 번에 엄청난 열매 획득",
+  },
+  {
+    name: "중장비 기사 고라니",
+    type: "auto",
+    value: 1000,
+    price: 600000,
+    text: "포크레인으로 나무 흔듦",
+  },
+  {
+    name: "뉴턴 고라니",
+    type: "newton",
+    value: 10,
+    price: 1000000,
+    text: "최적의 타격점 계산",
+  },
 ];
 
 // 동료 가격 : 레벨업할수록 1.5배씩
-const getMemberPrice = (i) => Math.floor(memberList[i].price * Math.pow(1.5, game.members[i]));
+const getMemberPrice = (i) =>
+  Math.floor(memberList[i].price * Math.pow(1.2, game.members[i]));
 
 // 특정 type 동료들의 효과 합 (value × 동료 레벨)
 const getMemberSum = (type) => {
@@ -133,12 +201,18 @@ const getMemberCount = () => game.members.filter((lv) => lv > 0).length;
 // 동료 효과 설명
 const getMemberEffectText = (m) => {
   switch (m.type) {
-    case "auto": return `초당 열매 +${m.value}`;
-    case "click": return `클릭당 열매 +${m.value}`;
-    case "homerun": return `홈런 확률 +${m.value}%`;
-    case "smith": return `강화 비용 -${m.value}%`;
-    case "newton": return `모든 생산량 +${m.value}%`;
-    case "sleep": return `오프라인 보상 +${m.value}%`;
+    case "auto":
+      return `초당 열매 +${m.value}`;
+    case "click":
+      return `클릭당 열매 +${m.value}`;
+    case "homerun":
+      return `홈런 확률 +${m.value}%`;
+    case "smith":
+      return `강화 비용 -${m.value}%`;
+    case "newton":
+      return `모든 생산량 +${m.value}%`;
+    case "sleep":
+      return `오프라인 보상 +${m.value}%`;
   }
 };
 
@@ -150,9 +224,27 @@ function buyMember(i) {
 
 // ---------- 3.2 펫 ----------
 const petList = [
-  { name: "병아리", type: "click", bonus: 10, price: 500, text: "클릭 열매 +10%" },
-  { name: "람쥐", type: "auto", bonus: 15, price: 1000, text: "초당 열매 +15%" },
-  { name: "부엉이", type: "auto", bonus: 30, price: 50000, text: "밤에도 열매 수확, 초당 열매 +30%" },
+  {
+    name: "병아리",
+    type: "click",
+    bonus: 10,
+    price: 500,
+    text: "클릭 열매 +10%",
+  },
+  {
+    name: "람쥐",
+    type: "auto",
+    bonus: 15,
+    price: 1000,
+    text: "초당 열매 +15%",
+  },
+  {
+    name: "부엉이",
+    type: "auto",
+    bonus: 30,
+    price: 50000,
+    text: "밤에도 열매 수확, 초당 열매 +30%",
+  },
 ];
 
 // 펫 보너스 % 합 (type : "click" 또는 "auto")
@@ -182,13 +274,48 @@ setInterval(() => {
 // icon : 고라니 머리 위에 표시할 이모지
 const skinList = [
   { name: "기본", text: "기본", icon: "", check: () => true },
-  { name: "마술 모자", text: "동료 3명 영입", icon: "🎩", check: () => getMemberCount() >= 3 },
-  { name: "선글라스", text: "Lv.100", icon: "🕶️", check: () => game.level >= 100 },
-  { name: "빨간 목도리", text: "총 열매 1000", icon: "🧣", check: () => game.totalBerry >= 1000 },
-  { name: "밀짚모자", text: "클릭 10,000회", icon: "👒", check: () => game.clickCount >= 10000 },
-  { name: "안전모", text: "Lv.300", icon: "⛑️", check: () => game.level >= 300 },
-  { name: "헤드폰", text: "Lv.500", icon: "🎧", check: () => game.level >= 500 },
-  { name: "황금 고라니", text: "Lv.800 만렙", icon: "👑", check: () => game.level >= MAX_LEVEL },
+  {
+    name: "마술 모자",
+    text: "동료 3명 영입",
+    icon: "🎩",
+    check: () => getMemberCount() >= 3,
+  },
+  {
+    name: "선글라스",
+    text: "Lv.100",
+    icon: "🕶️",
+    check: () => game.level >= 100,
+  },
+  {
+    name: "빨간 목도리",
+    text: "총 열매 1000",
+    icon: "🧣",
+    check: () => game.totalBerry >= 1000,
+  },
+  {
+    name: "밀짚모자",
+    text: "클릭 10,000회",
+    icon: "👒",
+    check: () => game.clickCount >= 10000,
+  },
+  {
+    name: "안전모",
+    text: "Lv.300",
+    icon: "⛑️",
+    check: () => game.level >= 300,
+  },
+  {
+    name: "헤드폰",
+    text: "Lv.500",
+    icon: "🎧",
+    check: () => game.level >= 500,
+  },
+  {
+    name: "황금 고라니",
+    text: "Lv.800 만렙",
+    icon: "👑",
+    check: () => game.level >= MAX_LEVEL,
+  },
 ];
 
 function selectSkin(i) {
@@ -243,7 +370,8 @@ mapList.set("숲 깊은 곳", {
 
 function moveMap(name) {
   const { needLevel } = mapList.get(name); // 구조 분해 할당
-  if (game.level < needLevel) return alert(`Lv.${needLevel} 이상만 이동할 수 있습니다.`);
+  if (game.level < needLevel)
+    return alert(`Lv.${needLevel} 이상만 이동할 수 있습니다.`);
   game.map = name;
   render();
 }
@@ -253,10 +381,10 @@ const BOOSTER_TIME = 30; // 부스터 지속 시간 (초)
 
 const isBoosterOn = () => Date.now() < boosterEnd;
 
-// 부스터 가격 : 최소 500, 초당 열매가 많아지면 같이 비싸짐
+// 하이퍼 부스터 가격 : 최소 500, 초당 열매가 많아지면 같이 비싸짐
 const getBoosterPrice = () => Math.max(500, getAutoBerry() * 20);
 
-// 이주호 가격 : 최소 100, 클릭당 열매에 따라 비싸짐
+// 부스터 가격 : 최소 100, 클릭당 열매에 따라 비싸짐
 const getJuhoPrice = () => Math.max(100, getClickBerry() * 20);
 
 function buyBooster() {
@@ -272,7 +400,7 @@ function buyJuho() {
 
   // 30% 확률로 꽝, 아니면 가격의 0.5 ~ 3배
   if (getRandomInteger(1, 100) <= 30) {
-    alert("이주호가 열매를 들고 도망갔다... (꽝)");
+    alert("김진수가 열매를 들고 도망갔다... (꽝)");
   } else {
     const prize = getRandomInteger(Math.floor(price / 2), price * 3);
     addBerry(prize);
@@ -280,6 +408,11 @@ function buyJuho() {
   }
   render();
 }
+
+// ---------- 움직이는 고라니 (deer-sprite.js) ----------
+const deerSprite = DeerSprite.create(document.getElementById("deer-canvas"));
+// 스킨 아이콘이 머리를 따라 움직이게 (190, 205 = 그림에서 머리 꼭대기 위치)
+deerSprite.attachToHead(document.getElementById("skin-icon"), 190, 205);
 
 // ---------- HTML 요소 ----------
 const berry_box = document.getElementById("berry");
@@ -384,7 +517,9 @@ function render() {
 function renderMain() {
   const skin = skinList.find((s) => s.name === game.skin);
   document.getElementById("skin-icon").innerText = skin.icon;
-  document.getElementById("deer-box").classList.toggle("golden", game.skin === "황금 고라니");
+  document
+    .getElementById("deer-box")
+    .classList.toggle("golden", game.skin === "황금 고라니");
 
   const map = mapList.get(game.map);
   const bgImg = document.getElementById("background-img");
@@ -404,8 +539,10 @@ function renderUpgrade() {
   const isMax = game.level >= MAX_LEVEL;
   const btn = document.getElementById("upgrade-btn");
 
-  document.getElementById("upgrade-level").innerText = `고라니 Lv. ${game.level}` + (isMax ? " (MAX)" : "");
-  document.getElementById("upgrade-desc").innerText = `클릭당 열매 ${fmt(getClickBerry())}`;
+  document.getElementById("upgrade-level").innerText =
+    `고라니 Lv. ${game.level}` + (isMax ? " (MAX)" : "");
+  document.getElementById("upgrade-desc").innerText =
+    `클릭당 열매 ${fmt(getClickBerry())}`;
   btn.innerHTML = isMax ? "만렙" : `강화하기<br>열매 ${fmt(getUpgradePrice())}`;
   btn.disabled = isMax || game.berry < getUpgradePrice();
 }
@@ -474,9 +611,12 @@ function renderSkin() {
 // 6. 맵 탭
 function renderMap() {
   const now = mapList.get(game.map);
-  setHTML("map-current", `
+  setHTML(
+    "map-current",
+    `
     ${game.map} (선택됨 · 열매 x${now.bonus})
-    <p style="font-size: 11px; font-weight: normal; margin-top: 4px;">${now.text}</p>`);
+    <p style="font-size: 11px; font-weight: normal; margin-top: 4px;">${now.text}</p>`,
+  );
 
   let html = "";
   mapList.forEach((info, name) => {
@@ -502,11 +642,13 @@ function renderShop() {
   const boosterBtn = document.getElementById("booster-btn");
   if (isBoosterOn()) {
     const left = Math.ceil((boosterEnd - Date.now()) / 1000);
-    document.getElementById("booster-desc").innerText = `사용중! 남은 시간 ${left}초`;
+    document.getElementById("booster-desc").innerText =
+      `사용중! 남은 시간 ${left}초`;
     boosterBtn.innerHTML = "사용중";
     boosterBtn.disabled = true;
   } else {
-    document.getElementById("booster-desc").innerText = `${BOOSTER_TIME}초 동안 모든 열매 2배`;
+    document.getElementById("booster-desc").innerText =
+      `${BOOSTER_TIME}초 동안 모든 열매 2배`;
     boosterBtn.innerHTML = `구매<br>${fmt(getBoosterPrice())}`;
     boosterBtn.disabled = game.berry < getBoosterPrice();
   }

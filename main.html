@@ -80,27 +80,24 @@
             user-select: none;
         }
 
-        .deer-box img {
+        /* 움직이는 사슴 캔버스 (deer-sprite.js 가 그림) */
+        .deer-box canvas {
+            display: block;
             height: 150px;
-            transition: transform 0.05s;
+            aspect-ratio: 880 / 1000;
         }
 
-        .deer-box:active img {
-            transform: scale(0.95);
-        }
-
-        /* 스킨 아이콘 : 고라니 머리 위 */
+        /* 스킨 아이콘 : 고라니 머리 위 (위치는 deer-sprite.js 가 매 프레임 맞춰줌) */
         #skin-icon {
             position: absolute;
-            top: -4px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 32px;
+            font-size: 26px;
+            line-height: 1;
             pointer-events: none;
+            transform-origin: 50% 100%;
         }
 
         /* 황금 고라니 스킨 */
-        .deer-box.golden img {
+        .deer-box.golden canvas {
             filter: sepia(1) saturate(5) hue-rotate(5deg) brightness(1.1);
         }
 
@@ -352,7 +349,7 @@
         <div id="tab-main" class="game-screen active"
             style="justify-content: center; align-items: center; position: relative; z-index: 1;">
             <div class="deer-box" id="deer-box" onclick="clickDeer(event)">
-                <img src="https://www.svgrepo.com/show/396279/deer.svg" alt="고라니">
+                <canvas id="deer-canvas" aria-label="고라니"></canvas>
                 <span id="skin-icon"></span>
             </div>
             <p id="deer-info"></p>
@@ -429,7 +426,7 @@
             </div>
             <div class="list-item">
                 <div class="list-item-info">
-                    <span style="font-weight: bold;">이주호</span>
+                    <span style="font-weight: bold;">부스터</span>
                     <span class="desc">랜덤으로 열매를 줌 (꽝 있음)</span>
                 </div>
                 <button class="btn-action" id="juho-btn" onclick="buyJuho()">구매<br>100</button>
@@ -462,6 +459,7 @@
     </div>
 
     <!-- openTab 포함 모든 JS 는 main.js 에 있음 -->
+    <script src="./deer-move.js"></script>
     <script src="./main.js"></script>
 </body>
 
