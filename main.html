@@ -104,7 +104,8 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 260px; /* main.js 의 BG_HEIGHT 와 같게 */
+            height: 260px;
+            /* main.js 의 BG_HEIGHT 와 같게 */
             object-fit: cover;
             z-index: 0;
         }
@@ -135,7 +136,8 @@
         #crew {
             position: absolute;
             inset: 0;
-            pointer-events: none; /* 클릭은 고라니만 */
+            pointer-events: none;
+            /* 클릭은 고라니만 */
         }
 
         .crew-member {
@@ -155,7 +157,9 @@
         }
 
         @keyframes crewBob {
-            50% { margin-top: -3px; }
+            50% {
+                margin-top: -3px;
+            }
         }
 
         .click-effect {
@@ -383,11 +387,38 @@
             touch-action: manipulation;
         }
 
+        /* ===== 알림 메시지 (토스트) : 잠깐 떴다 사라짐, 게임은 안 멈춤 ===== */
+        #toast {
+            position: absolute;
+            left: 50%;
+            top: 46px;
+            transform: translate(-50%, -6px);
+            z-index: 95;
+            max-width: 300px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            white-space: pre-line;
+            color: white;
+            background: rgba(0, 0, 0, 0.75);
+            border-radius: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+
         /* ===== 오프라인 보상 창 ===== */
         #offline-popup {
             position: absolute;
             inset: 0;
-            z-index: 90; /* 컷씬(100) 보다는 아래 */
+            z-index: 90;
+            /* 컷씬(100) 보다는 아래 */
             display: none;
             align-items: center;
             justify-content: center;
@@ -451,8 +482,13 @@
         }
 
         @keyframes cutFade {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         /* 위 : 그림 칸 */
@@ -485,8 +521,15 @@
         }
 
         @keyframes charPop {
-            from { transform: translateY(10px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(10px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         /* 그림 파일이 없을 때 보이는 칸 */
@@ -556,7 +599,9 @@
         }
 
         @keyframes blink {
-            50% { opacity: 0; }
+            50% {
+                opacity: 0;
+            }
         }
 
         #cut-page {
@@ -595,12 +640,11 @@
                 <img src="https://svgsilh.com/svg/147414.svg" width="16" height="16" alt="설정">
             </button>
         </div>
-             
-        <img src="https://media.istockphoto.com/id/1326389468/vector/beautiful-sunlit-forest.jpg?s=612x612&w=0&k=20&c=ik0tGlKOhIY4w85MvSnhgF05MogXxP2CDDBbHb-d57M="
-            alt="배경"
-            id="background-img">
 
-<!-- 메인 : 고라니 + 스킨 아이콘 + 정보 (클릭 이펙트는 JS가 추가) -->
+        <img src="https://media.istockphoto.com/id/1326389468/vector/beautiful-sunlit-forest.jpg?s=612x612&w=0&k=20&c=ik0tGlKOhIY4w85MvSnhgF05MogXxP2CDDBbHb-d57M="
+            alt="배경" id="background-img">
+
+        <!-- 메인 : 고라니 + 스킨 아이콘 + 정보 (클릭 이펙트는 JS가 추가) -->
         <div id="tab-main" class="game-screen active" style="position: relative; z-index: 1;">
             <div id="crew"></div>
             <div class="deer-box" id="deer-box" onclick="clickDeer(event)">
@@ -676,12 +720,20 @@
 
         <!-- 상점 -->
         <div id="tab-shop" class="game-screen" style="position: relative; z-index: 1; background: white;">
+            <!-- 부스터 : 번호(0, 1)는 main.js 의 boosterList 순서 -->
             <div class="list-item">
                 <div class="list-item-info">
                     <span style="font-weight: bold;">열매 2배 부스터</span>
-                    <span class="desc" id="booster-desc">30초 동안 모든 열매 2배</span>
+                    <span class="desc" id="booster-desc-0">30초 동안 모든 열매 2배</span>
                 </div>
-                <button class="btn-action" id="booster-btn" onclick="buyBooster()">구매<br>500</button>
+                <button class="btn-action" id="booster-btn-0" onclick="buyBooster(0)">구매<br>500</button>
+            </div>
+            <div class="list-item">
+                <div class="list-item-info">
+                    <span style="font-weight: bold;">열매 100배 부스터</span>
+                    <span class="desc" id="booster-desc-1">30초 동안 모든 열매 100배</span>
+                </div>
+                <button class="btn-action" id="booster-btn-1" onclick="buyBooster(1)">구매<br>10,000</button>
             </div>
             <div class="list-item">
                 <div class="list-item-info">
@@ -715,6 +767,9 @@
                 <span class="value">0</span>
             </div>
         </div>
+
+        <!-- 알림 메시지 : main.js 의 showToast() 가 띄움 -->
+        <div id="toast"></div>
 
         <!-- 오프라인 보상 창 : main.js 의 showOfflinePopup() 이 띄움 -->
         <div id="offline-popup">

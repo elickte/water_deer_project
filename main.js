@@ -7,7 +7,7 @@ const NewGame = () => ({
   clickCount: 0, // 클릭 횟수
   level: 1, // 고라니 레벨
   members: new Array(12).fill(0), // 동료 레벨 (0 = 아직 영입 안 함)
-  pets: [false, false, false], // 펫 보유 여부
+  pets: new Array(10).fill(false), // 펫 보유 여부 (petList 개수와 같게)
   skin: "기본", // 적용중인 스킨
   map: "숲", // 현재 맵
   bgm: true,
@@ -17,8 +17,7 @@ const NewGame = () => ({
 });
 let game = NewGame();
 
-let boosterEnd = 0; // 부스터 끝나는 시간 (저장 안 함)
-let boosterReady = 0; // 부스터를 다시 살 수 있는 시간 (쿨타임)
+// 부스터 상태는 아래 상점의 boosterList 안에 (end, ready) 로 들고 있음 (저장 안 함)
 
 // 최소값~최대값 사이 랜덤 정수 (수업 common.js 에서 가져옴)
 function getRandomInteger(min, max) {
@@ -80,7 +79,7 @@ const getUpgradePrice = () => {
 // 성공하면 true, 실패하면 false 를 돌려줌 (꾹 누르기가 멈출지 판단)
 function upgradeDeer(quiet) {
   if (game.level >= MAX_LEVEL) {
-    if (!quiet) alert("이미 만렙입니다!");
+    if (!quiet) showToast("이미 만렙입니다!");
     return false;
   }
   if (!spend(getUpgradePrice(), quiet)) return false;
@@ -185,17 +184,26 @@ const memberList = [
   },
 ];
 
-// 동료 가격 : 레벨업할수록 1.2배씩 (곱연산) × 대장장이 할인
+// 동료 가격 : 레벨업할수록 1.1배씩 (곱연산) × 대장장이 할인
 const getMemberPrice = (i) =>
   Math.floor(
-    memberList[i].price * Math.pow(1.2, game.members[i]) * getSmithRate(),
+    memberList[i].price * Math.pow(1.1, game.members[i]) * getSmithRate(),
   );
 
-// 특정 type 동료들의 효과 합 (value × 동료 레벨)
+// 동료 성장 : 레벨 × 2^(레벨 ÷ 10)  → 10레벨마다 효과가 2배
+// 예) 엄마고라니(+1) Lv.9 = 9, Lv.10 = 20, Lv.50 = 1,600, Lv.100 = 102,400
+//    → 처음엔 레벨당 +1 이지만, 나중엔 레벨당 +100, +1000 씩 오름
+const getMemberScale = (lv) => lv * Math.pow(2, Math.floor(lv / 10));
+
+// 특정 type 동료들의 효과 합
+// 초당·클릭 열매는 위의 성장 공식, 홈런 확률은 그냥 레벨만큼 (확률이라)
 const getMemberSum = (type) => {
   let sum = 0;
   memberList.forEach((m, i) => {
-    if (m.type === type) sum += m.value * game.members[i];
+    const lv = game.members[i];
+    if (m.type !== type) return;
+    sum +=
+      m.value * (type === "auto" || type === "click" ? getMemberScale(lv) : lv);
   });
   return sum;
 };
@@ -241,6 +249,8 @@ function buyMember(i, quiet) {
 }
 
 // ---------- 3.2 펫 ----------
+// 순서를 바꾸면 예전 세이브의 펫이 바뀌니까, 새 펫은 항상 맨 뒤에 추가
+// (화면에는 가격 순으로 정렬해서 보여줌)
 const petList = [
   {
     name: "병아리",
@@ -262,6 +272,55 @@ const petList = [
     bonus: 30,
     price: 50000,
     text: "밤에도 열매 수확, 초당 열매 +30%",
+  },
+  {
+    name: "토끼",
+    type: "click",
+    bonus: 20,
+    price: 3000,
+    text: "깡총 박치기, 클릭 열매 +20%",
+  },
+  {
+    name: "고슴도치",
+    type: "auto",
+    bonus: 25,
+    price: 8000,
+    text: "가시에 사과를 꽂아 옴, 초당 열매 +25%",
+  },
+  {
+    name: "너구리",
+    type: "click",
+    bonus: 35,
+    price: 20000,
+    text: "재주 넘기, 클릭 열매 +35%",
+  },
+  {
+    name: "여우",
+    type: "click",
+    bonus: 50,
+    price: 100000,
+    text: "꼬리로 나무 쓸기, 클릭 열매 +50%",
+  },
+  {
+    name: "곰",
+    type: "auto",
+    bonus: 60,
+    price: 250000,
+    text: "나무를 통째로 흔듦, 초당 열매 +60%",
+  },
+  {
+    name: "독수리",
+    type: "click",
+    bonus: 80,
+    price: 500000,
+    text: "하늘에서 사과 낚아채기, 클릭 열매 +80%",
+  },
+  {
+    name: "유니콘",
+    type: "click",
+    bonus: 100,
+    price: 1000000,
+    text: "전설의 뿔, 클릭 열매 +100%",
   },
 ];
 
@@ -286,11 +345,33 @@ function buyPet(i) {
 }
 
 // ---------- 4. 방치 시스템 (setInterval) ----------
-// 1초마다 초당 열매만큼 자동으로 추가
+// 1초마다 "지난번부터 흐른 시간 × 초당 열매" 만큼 추가
+// → 확인창(confirm)이 떠서 타이머가 잠깐 멈춰도, 닫으면 그동안 몫까지 한 번에 들어옴
+let lastTick = Date.now();
+let autoCarry = 0; // 1개가 안 되는 자투리 열매 모아두기
+
 setInterval(() => {
-  addBerry(getAutoBerry());
+  const now = Date.now();
+  const sec = Math.min((now - lastTick) / 1000, 300); // 최대 5분 (그 이상은 오프라인 보상이 담당)
+  lastTick = now;
+
+  autoCarry += getAutoBerry() * sec;
+  const whole = Math.floor(autoCarry);
+  autoCarry -= whole;
+  addBerry(whole);
   render(); // 부스터 남은 시간도 같이 갱신
 }, 1000);
+
+// ---------- 알림 메시지 (토스트) ----------
+// alert() 는 창이 떠 있는 동안 게임이 멈춰서, 화면 위에 잠깐 떴다 사라지는 메시지로 대신함
+let toastTimer = null;
+function showToast(text) {
+  const box = document.getElementById("toast");
+  box.innerText = text;
+  box.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => box.classList.remove("show"), 1800);
+}
 
 // ---------- 5. 스킨 ----------
 // sprite : 스킨 고라니 그림 (skins.js 의 SKIN_IMAGES, 원본은 assets/skins 폴더)
@@ -361,7 +442,7 @@ function applySkin(skin) {
 
 function selectSkin(i) {
   const skin = skinList[i];
-  if (!skin.check()) return alert(`잠금 조건: ${skin.text}`);
+  if (!skin.check()) return showToast(`잠금 조건: ${skin.text}`);
   game.skin = skin.name;
   render();
 }
@@ -496,39 +577,72 @@ function checkMapUnlock() {
 function moveMap(name) {
   const { needLevel } = mapList.get(name); // 구조 분해 할당
   if (game.level < needLevel)
-    return alert(`Lv.${needLevel} 이상만 이동할 수 있습니다.`);
+    return showToast(`Lv.${needLevel} 이상만 이동할 수 있습니다.`);
   game.map = name;
   render();
 }
 
 // ---------- 상점 ----------
-const BOOSTER_TIME = 30; // 부스터 지속 시간 (초)
+// 부스터 2종 : 둘 다 30초 지속, 쿨타임 2분 (구매한 때부터)
+// power : 배율 / level : 이 레벨부터 구매 가능 / minPrice·priceSec : 가격 = 최소가격 또는 초당 열매 × priceSec 초
+// end   : 효과가 끝나는 시간 / ready : 다시 살 수 있는 시간
+// 두 부스터를 같이 켜면 효과도 곱해짐 (2배 × 100배 = 200배)
+const BOOSTER_TIME = 30; // 지속 시간 (초)
+const BOOSTER_COOLDOWN = 120; // 쿨타임 (초)
+const boosterList = [
+  {
+    name: "열매 2배 부스터",
+    power: 2,
+    level: 1,
+    minPrice: 500,
+    priceSec: 20,
+    end: 0,
+    ready: 0,
+  },
+  {
+    name: "열매 100배 부스터",
+    power: 100,
+    level: 150,
+    minPrice: 10000,
+    priceSec: 300,
+    end: 0,
+    ready: 0,
+  },
+];
 
-const BOOSTER_COOLDOWN = 120; // 쿨타임 (초) : 구매한 때부터 2분 뒤에 다시 구매 가능
+const isBoosterOn = (b) => Date.now() < b.end;
+const getBoosterCooldown = (b) =>
+  Math.max(0, Math.ceil((b.ready - Date.now()) / 1000));
+const getBoosterPrice = (b) =>
+  Math.max(b.minPrice, getAutoBerry() * b.priceSec);
 
-const isBoosterOn = () => Date.now() < boosterEnd;
-const getBoosterCooldown = () =>
-  Math.max(0, Math.ceil((boosterReady - Date.now()) / 1000));
+// 지금 켜진 부스터들의 배율 (안 켜져 있으면 1)
+const getBoosterPower = () => {
+  let power = 1;
+  boosterList.forEach((b) => {
+    if (isBoosterOn(b)) power *= b.power;
+  });
+  return power;
+};
 
 // 초 → "1:05"
 const fmtTime = (sec) =>
   `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
 
-// 하이퍼 부스터 가격 : 최소 500, 초당 열매가 많아지면 같이 비싸짐
-const getBoosterPrice = () => Math.max(500, getAutoBerry() * 20);
-
-// 부스터 가격 : 최소 100, 클릭당 열매에 따라 비싸짐
-const getJuhoPrice = () => Math.max(100, getClickBerry() * 20);
-
-function buyBooster() {
-  if (isBoosterOn()) return alert("이미 부스터 사용중입니다.");
-  if (getBoosterCooldown() > 0)
-    return alert(`쿨타임 ${fmtTime(getBoosterCooldown())} 남았어요.`);
-  if (!spend(getBoosterPrice())) return;
-  boosterEnd = Date.now() + BOOSTER_TIME * 1000;
-  boosterReady = Date.now() + BOOSTER_COOLDOWN * 1000;
+function buyBooster(i) {
+  const b = boosterList[i];
+  if (game.level < b.level) return showToast(`Lv.${b.level}부터 쓸 수 있어요.`);
+  if (isBoosterOn(b)) return showToast("이미 사용중입니다.");
+  if (getBoosterCooldown(b) > 0)
+    return showToast(`쿨타임 ${fmtTime(getBoosterCooldown(b))} 남았어요.`);
+  if (!spend(getBoosterPrice(b))) return;
+  b.end = Date.now() + BOOSTER_TIME * 1000;
+  b.ready = Date.now() + BOOSTER_COOLDOWN * 1000;
   render();
 }
+
+// 이주호 가격 : 최소 100, 클릭당 열매에 따라 비싸짐
+const getJuhoPrice = () => Math.max(100, getClickBerry() * 20);
 
 function buyJuho() {
   const price = getJuhoPrice();
@@ -536,11 +650,11 @@ function buyJuho() {
 
   // 30% 확률로 꽝, 아니면 가격의 0.5 ~ 3배
   if (getRandomInteger(1, 100) <= 30) {
-    alert("김진수가 열매를 들고 도망갔다... (꽝)");
+    showToast("김진수가 열매를 들고 도망갔다... (꽝)");
   } else {
     const prize = getRandomInteger(Math.floor(price / 2), price * 3);
     addBerry(prize);
-    alert(`이주호가 열매 ${fmt(prize)}개를 가져왔다!`);
+    showToast(`이주호가 열매 ${fmt(prize)}개를 가져왔다!`);
   }
   render();
 }
@@ -566,7 +680,7 @@ const addBerry = (amount) => {
 // 열매 쓰기 : 모자라면 false (quiet 면 알림창 안 띄움)
 const spend = (price, quiet) => {
   if (game.berry < price) {
-    if (!quiet) alert(`열매가 부족합니다! (필요: ${fmt(price)})`);
+    if (!quiet) showToast(`열매가 부족합니다! (필요: ${fmt(price)})`);
     return false;
   }
   game.berry -= price;
@@ -590,7 +704,7 @@ function getMemberPowerDown(type) {
 // 공통 배율 = 맵 × 뉴턴 × 부스터 (전부 곱하기)
 const getMultiplier = () => {
   let value = getMapBonus() * getMemberPower("newton");
-  if (isBoosterOn()) value *= 2;
+  value *= getBoosterPower(); // 켜진 부스터 배율
   return value;
 };
 
@@ -771,9 +885,9 @@ function onSaveFile(input) {
       applySave(data);
       saveGame();
       refreshAll();
-      alert(`불러오기 완료! (Lv.${game.level}, 열매 ${fmt(game.berry)})`);
+      showToast(`불러오기 완료! (Lv.${game.level}, 열매 ${fmt(game.berry)})`);
     } catch (e) {
-      alert("세이브 파일이 아니거나 깨진 파일이에요.");
+      showToast("세이브 파일이 아니거나 깨진 파일이에요.");
     }
   };
   reader.readAsText(file);
@@ -789,11 +903,10 @@ function resetGame() {
 
   localStorage.removeItem(SAVE_KEY);
   game = NewGame();
-  boosterEnd = 0;
-  boosterReady = 0;
+  boosterList.forEach((b) => (b.end = b.ready = 0));
   refreshAll();
   openTab("tab-main", null);
-  alert("초기화했어요. 처음부터 시작합니다!");
+  showToast("초기화했어요. 처음부터 시작합니다!");
   playStory("intro");
 }
 
@@ -864,7 +977,7 @@ function renderMain() {
   renderCrew(); // 새로 영입한 동료가 있으면 배경에 추가 (바뀐 게 없으면 그대로)
 
   let info = `Lv.${game.level} · ${game.map}`;
-  if (isBoosterOn()) info += " · 🔥2배"; // 자리가 좁아서 짧게
+  if (getBoosterPower() > 1) info += ` · 🔥${getBoosterPower()}배`; // 자리가 좁아서 짧게
   document.getElementById("deer-info").innerText = info;
 }
 
@@ -884,6 +997,11 @@ function renderUpgrade() {
 // % 동료는 지금 총 효과도 보여주기 : (지금 ×1.33)
 function getMemberNowText(m, lv) {
   if (lv === 0) return "";
+  if (m.type === "auto" || m.type === "click") {
+    const now = m.value * getMemberScale(lv);
+    const next = m.value * (getMemberScale(lv + 1) - getMemberScale(lv));
+    return `<br>지금 +${fmt(now)} · 다음 레벨 +${fmt(next)}`;
+  }
   if (m.type === "newton" || m.type === "sleep") {
     return ` (지금 ×${Math.pow(1 + m.value / 100, lv).toFixed(2)})`;
   }
@@ -919,7 +1037,12 @@ function renderMember() {
 // 3.2 펫 탭
 function renderPet() {
   let html = "";
-  petList.forEach((p, i) => {
+  // 가격 순으로 보여주기 (petList 순서는 그대로 두고 번호만 정렬)
+  const order = petList
+    .map((p, i) => i)
+    .sort((a, b) => petList[a].price - petList[b].price);
+  order.forEach((i) => {
+    const p = petList[i];
     const have = game.pets[i];
     const price = getPetPrice(i);
     const btnText = have ? "보유중" : `구매<br>${fmt(price)}`;
@@ -989,25 +1112,30 @@ function renderMap() {
 
 // 상점 탭
 function renderShop() {
-  const boosterBtn = document.getElementById("booster-btn");
-  if (isBoosterOn()) {
-    const left = Math.ceil((boosterEnd - Date.now()) / 1000);
-    document.getElementById("booster-desc").innerText =
-      `사용중! 남은 시간 ${left}초`;
-    boosterBtn.innerHTML = "사용중";
-    boosterBtn.disabled = true;
-  } else if (getBoosterCooldown() > 0) {
-    // 쿨타임 중
-    document.getElementById("booster-desc").innerText =
-      `쿨타임 ${fmtTime(getBoosterCooldown())} 남음`;
-    boosterBtn.innerHTML = "쿨타임";
-    boosterBtn.disabled = true;
-  } else {
-    document.getElementById("booster-desc").innerText =
-      `${BOOSTER_TIME}초 동안 모든 열매 2배 (쿨타임 2분)`;
-    boosterBtn.innerHTML = `구매<br>${fmt(getBoosterPrice())}`;
-    boosterBtn.disabled = game.berry < getBoosterPrice();
-  }
+  boosterList.forEach((b, i) => {
+    const desc = document.getElementById(`booster-desc-${i}`);
+    const btn = document.getElementById(`booster-btn-${i}`);
+    const price = getBoosterPrice(b);
+
+    if (game.level < b.level) {
+      desc.innerText = `🔒 Lv.${b.level}부터 구매 가능`;
+      btn.innerHTML = "잠김";
+      btn.disabled = true;
+    } else if (isBoosterOn(b)) {
+      const left = Math.ceil((b.end - Date.now()) / 1000);
+      desc.innerText = `사용중! 남은 시간 ${left}초`;
+      btn.innerHTML = "사용중";
+      btn.disabled = true;
+    } else if (getBoosterCooldown(b) > 0) {
+      desc.innerText = `쿨타임 ${fmtTime(getBoosterCooldown(b))} 남음`;
+      btn.innerHTML = "쿨타임";
+      btn.disabled = true;
+    } else {
+      desc.innerText = `${BOOSTER_TIME}초 동안 모든 열매 ${b.power}배 (쿨타임 2분)`;
+      btn.innerHTML = `구매<br>${fmt(price)}`;
+      btn.disabled = game.berry < price;
+    }
+  });
 
   const juhoBtn = document.getElementById("juho-btn");
   juhoBtn.innerHTML = `구매<br>${fmt(getJuhoPrice())}`;
