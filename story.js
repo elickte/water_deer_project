@@ -22,8 +22,8 @@ const storyList = {
     { text: "숲 한가운데에는 사과가 주렁주렁 열리는 커다란 나무가 있었죠." },
     { img: S + "intro_2.jpg", text: "그런데 어느 날, 숲 저편에서 '부릉부릉' 낯선 소리가 들려오기 시작했어요." },
     { char: HERO, name: "고라니", text: "뭐, 뭐야...? 저 노란 쇳덩어리는...?!" },
-    { img: [S + "intro_3.png", S + "intro_2.jpg"], char: "", text: "인간들이 숲을 밀어내기 시작한 거예요. 나무가 쓰러질 때마다 고라니들의 먹을거리도 줄어들었어요." },
-    { img: [S + "intro_4.png", S + "intro_1.jpg"], char: HERO, name: "고라니", text: "이대로는 안 돼... 내가 열매를 모아서 우리 숲을 지킬 거야!" },
+    { img: S + "intro_3.jpg", char: "", text: "인간들이 숲을 밀어내기 시작한 거예요. 나무가 쓰러질 때마다 고라니들의 먹을거리도 줄어들었어요." },
+    { img: S + "intro_4.jpg", char: "", name: "고라니", text: "이대로는 안 돼... 내가 열매를 모아서 우리 숲을 지킬 거야!" },
     { char: "", text: "고라니를 톡톡 눌러 열매를 모으고, 동료를 모아 고라니 왕국을 키워 보세요!" },
   ],
 
@@ -105,13 +105,15 @@ const storyList = {
   ],
   // 마지막 맵 = 엔딩
   "map_숲 깊은 곳": [
-    { img: [S + "ending_1.png", "assets/maps/deep_forest.jpg"], char: "", text: "드디어 만렙이 된 고라니. 그때, 숲 가장 깊은 곳에서 빛이 새어 나왔어요." },
-    { text: "그곳엔 처음 보는 거대한 사과나무, '숲의 심장'이 있었어요." },
-    { img: [S + "ending_2.png", "assets/maps/deep_forest.jpg"], name: "숲의 목소리", text: "고라니야... 네가 모은 열매 덕분에 숲이 다시 숨을 쉬는구나." },
+    { img: S + "ending_1.jpg", char: "", text: "드디어 만렙이 된 고라니. 그때, 숲 가장 깊은 곳에서 따스한 빛이 새어 나왔어요." },
+    { img: S + "ending_gate.jpg", text: "빛을 따라가 보니, 덩굴에 덮인 오래된 돌문이 환하게 빛나고 있었어요." },
+    { img: S + "ending_2.jpg", text: "돌문 너머엔 처음 보는 거대한 사과나무, '숲의 심장'이 있었어요." },
+    { name: "숲의 목소리", text: "고라니야... 네가 모은 열매 덕분에 숲이 다시 숨을 쉬는구나." },
     { text: "고라니들이 키운 숲을 본 인간들도, 결국 개발을 멈추기로 했어요." },
-    { img: [S + "ending_3.png", "assets/maps/forest.jpg"], char: HERO, name: "고라니", text: "우리 숲은... 우리가 지킨다!" },
+    { img: S + "ending_3.jpg", char: "", name: "고라니", text: "우리 숲은... 우리가 지킨다!" },
     { char: "", text: "- 고라니 키우기 끝 -\n함께해 줘서 고마워요! 계속 플레이할 수 있어요." },
   ],
+
 };
 
 // 스토리 그림의 땅 높이 (위에서부터 %) : 캐릭터 발이 여기에 닿음
@@ -119,6 +121,12 @@ const storyList = {
 const STORY_GROUND = {
   "assets/story/intro_1.jpg": 82,
   "assets/story/intro_2.jpg": 82,
+  "assets/story/intro_3.jpg": 85,
+  "assets/story/intro_4.jpg": 88,
+  "assets/story/ending_1.jpg": 88,
+  "assets/story/ending_gate.jpg": 76,
+  "assets/story/ending_2.jpg": 90,
+  "assets/story/ending_3.jpg": 83,
   "assets/maps/forest.jpg": 82,
   "assets/maps/sky.jpg": 79,
   "assets/maps/dev.jpg": 84,

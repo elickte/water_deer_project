@@ -97,7 +97,7 @@ function upgradeDeer(quiet) {
 // homerun: 클릭 시 value% 확률로 10배 (최대 50%, 확률이라 더하기)
 // smith  : 강화·동료·펫 비용 × (1 - value%) 를 레벨마다 곱함 (곱연산, 최소 10%)
 // newton : 모든 생산량 × (1 + value%) 를 레벨마다 곱함 (곱연산)
-// sleep  : 오프라인 보상 × (1 + value%) 를 레벨마다 곱함 (7번 저장 기능 만들 때 적용)
+// sleep  : 오프라인 보상 × (1 + value%) 를 레벨마다 곱함 (곱연산)
 const memberList = [
   {
     name: "엄마고라니",
@@ -678,12 +678,13 @@ function applySave(data) {
   if (!skinList.some((s) => s.name === game.skin)) game.skin = "기본";
 }
 
-// 시작할 때 저장된 데이터 불러오기
+// 시작할 때 저장된 데이터 불러오기 + 오프라인 보상
 function loadGame() {
   const text = localStorage.getItem(SAVE_KEY);
   if (!text) return;
   try {
     applySave(JSON.parse(text));
+    giveOfflineReward();
   } catch (e) {
     console.log("저장 데이터가 깨져서 새로 시작합니다.", e);
   }
@@ -693,7 +694,46 @@ setInterval(saveGame, 5000); // 5초마다 자동 저장
 window.addEventListener("beforeunload", saveGame); // 창 닫을 때도 저장
 
 // ---------- 오프라인 보상 ----------
-// TODO (잠자는고라니 sleep 효과 여기서 적용)
+// 마지막 접속 시간(lastTime)과 지금 시간을 비교해서
+// 게임을 꺼 둔 동안 모였을 열매를 줌 = 초당 열매 × 지난 시간(초) × 잠자는고라니 배율
+const OFFLINE_MAX_HOURS = 8; // 최대 8시간까지만 쳐 줌
+const OFFLINE_MIN_SEC = 60; // 1분 안에 다시 켜면 보상 없음
+
+function giveOfflineReward() {
+  const passed = Math.floor((Date.now() - game.lastTime) / 1000); // 지난 시간(초)
+  if (passed < OFFLINE_MIN_SEC) return;
+
+  const sec = Math.min(passed, OFFLINE_MAX_HOURS * 60 * 60);
+  const sleep = getMemberPower("sleep"); // 잠자는고라니 배율 (곱연산)
+  const reward = Math.floor(getAutoBerry() * sec * sleep);
+  if (reward <= 0) return; // 초당 열매가 없으면 보상도 없음
+
+  addBerry(reward); // 바로 넣어 둠 (창을 그냥 닫아도 보상은 받은 것)
+  game.lastTime = Date.now();
+  showOfflinePopup(passed, sec, reward, sleep);
+}
+
+// 초 → "2시간 13분"
+function fmtDuration(sec) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  if (h > 0) return `${h}시간 ${m}분`;
+  return `${m}분`;
+}
+
+function showOfflinePopup(passed, sec, reward, sleep) {
+  let text = `자리를 비운 ${fmtDuration(passed)} 동안`;
+  if (passed > sec) text += `\n(최대 ${OFFLINE_MAX_HOURS}시간까지만 쳐 줘요)`;
+  document.getElementById("offline-time").innerText = text;
+  document.getElementById("offline-reward").innerText = `열매 +${fmt(reward)}`;
+  document.getElementById("offline-sleep").innerText =
+    sleep > 1 ? `잠자는고라니 보너스 ×${sleep.toFixed(2)}` : "";
+  document.getElementById("offline-popup").classList.add("show");
+}
+
+function closeOfflinePopup() {
+  document.getElementById("offline-popup").classList.remove("show");
+}
 
 // ---------- 8. JSON 내보내기 / 불러오기 ----------
 // 내보내기 : game 을 JSON 파일로 다운로드

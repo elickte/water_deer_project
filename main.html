@@ -383,6 +383,56 @@
             touch-action: manipulation;
         }
 
+        /* ===== 오프라인 보상 창 ===== */
+        #offline-popup {
+            position: absolute;
+            inset: 0;
+            z-index: 90; /* 컷씬(100) 보다는 아래 */
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.45);
+        }
+
+        #offline-popup.show {
+            display: flex;
+        }
+
+        .offline-card {
+            width: 240px;
+            padding: 16px;
+            text-align: center;
+            background: #fffaf0;
+            border: 2px solid #c2410c;
+            border-radius: 12px;
+            animation: charPop 0.3s;
+        }
+
+        .offline-title {
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        #offline-time {
+            font-size: 12px;
+            white-space: pre-line;
+            color: #555;
+        }
+
+        #offline-reward {
+            margin: 8px 0 4px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #c2410c;
+        }
+
+        #offline-sleep {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
         /* ===== 컷씬 (story.js) ===== */
         #cutscene {
             position: absolute;
@@ -663,6 +713,17 @@
             <div class="info-card" id="sum_berry">
                 <span class="title">총 열매 생산량</span>
                 <span class="value">0</span>
+            </div>
+        </div>
+
+        <!-- 오프라인 보상 창 : main.js 의 showOfflinePopup() 이 띄움 -->
+        <div id="offline-popup">
+            <div class="offline-card">
+                <p class="offline-title">💤 오프라인 보상</p>
+                <p id="offline-time"></p>
+                <p id="offline-reward"></p>
+                <p id="offline-sleep"></p>
+                <button class="btn-action" onclick="closeOfflinePopup()">받기</button>
             </div>
         </div>
 
