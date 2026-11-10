@@ -159,6 +159,7 @@ const memberList = [
     type: "smith",
     value: 5,
     price: 150000,
+    maxLevel: 20, // 만렙 : 비용 ×0.36 (64% 할인)
     text: "장비 제작",
   },
   {
@@ -180,6 +181,7 @@ const memberList = [
     type: "newton",
     value: 10,
     price: 1000000,
+    maxLevel: 25, // 만렙 : 모든 생산량 ×10.8
     text: "최적의 타격점 계산",
   },
 ];
@@ -240,7 +242,16 @@ const getMemberEffectText = (m) => {
   }
 };
 
+// 만렙이 있는 동료인지, 만렙에 닿았는지 (maxLevel 이 없으면 만렙 없음)
+const isMemberMax = (i) =>
+  memberList[i].maxLevel !== undefined &&
+  game.members[i] >= memberList[i].maxLevel;
+
 function buyMember(i, quiet) {
+  if (isMemberMax(i)) {
+    if (!quiet) showToast(`${memberList[i].name}는 이미 만렙이에요!`);
+    return false; // 꾹 누르기도 여기서 멈춤
+  }
   if (!spend(getMemberPrice(i), quiet)) return false;
   game.members[i]++;
   if (game.members[i] === 1) playStory(`member_${i}`); // 처음 영입하면 컷씬
@@ -583,12 +594,12 @@ function moveMap(name) {
 }
 
 // ---------- 상점 ----------
-// 부스터 2종 : 둘 다 30초 지속, 쿨타임 2분 (구매한 때부터)
+// 부스터 2종 : 둘 다 30초 지속, 효과가 끝나고 쿨타임 10초
 // power : 배율 / level : 이 레벨부터 구매 가능 / minPrice·priceSec : 가격 = 최소가격 또는 초당 열매 × priceSec 초
 // end   : 효과가 끝나는 시간 / ready : 다시 살 수 있는 시간
 // 두 부스터를 같이 켜면 효과도 곱해짐 (2배 × 100배 = 200배)
 const BOOSTER_TIME = 30; // 지속 시간 (초)
-const BOOSTER_COOLDOWN = 120; // 쿨타임 (초)
+const BOOSTER_COOLDOWN = 10; // 쿨타임 (초) : 효과가 끝난 뒤 10초 지나면 다시 구매 가능
 const boosterList = [
   {
     name: "열매 2배 부스터",
@@ -637,7 +648,7 @@ function buyBooster(i) {
     return showToast(`쿨타임 ${fmtTime(getBoosterCooldown(b))} 남았어요.`);
   if (!spend(getBoosterPrice(b))) return;
   b.end = Date.now() + BOOSTER_TIME * 1000;
-  b.ready = Date.now() + BOOSTER_COOLDOWN * 1000;
+  b.ready = b.end + BOOSTER_COOLDOWN * 1000; // 효과 끝 + 10초
   render();
 }
 
@@ -785,7 +796,11 @@ function saveGame() {
 function applySave(data) {
   const base = NewGame();
   game = { ...base, ...data };
-  game.members = base.members.map((v, i) => Number(data.members?.[i]) || 0);
+  game.members = base.members.map((v, i) => {
+    const lv = Number(data.members?.[i]) || 0;
+    const max = memberList[i].maxLevel;
+    return max !== undefined ? Math.min(lv, max) : lv; // 만렙보다 높으면 만렙으로
+  });
   game.pets = base.pets.map((v, i) => Boolean(data.pets?.[i]));
   game.seenStory = Array.isArray(data.seenStory) ? data.seenStory : [];
   if (!mapList.has(game.map)) game.map = "숲";
@@ -1017,9 +1032,15 @@ function renderMember() {
   memberList.forEach((m, i) => {
     const lv = game.members[i];
     const price = getMemberPrice(i);
-    const title = lv > 0 ? `${m.name} Lv.${lv}` : m.name;
-    const btnText = lv > 0 ? "레벨업" : "영입";
-    const disabled = game.berry < price ? "disabled" : "";
+    const isMax = isMemberMax(i);
+    let title = lv > 0 ? `${m.name} Lv.${lv}` : m.name;
+    if (isMax) title += " (MAX)";
+    const btnText = isMax
+      ? "만렙"
+      : lv > 0
+        ? `레벨업<br>${fmt(price)}`
+        : `영입<br>${fmt(price)}`;
+    const disabled = isMax || game.berry < price ? "disabled" : "";
 
     html += `
       <div class="list-item">
@@ -1028,7 +1049,7 @@ function renderMember() {
           <span>${getMemberEffectText(m)}${getMemberNowText(m, lv)}</span>
           <span class="desc">${m.text}</span>
         </div>
-        <button class="btn-action hold-btn" onpointerdown="startHold(event, (q) => buyMember(${i}, q))" ${disabled}>${btnText}<br>${fmt(price)}</button>
+        <button class="btn-action hold-btn" onpointerdown="startHold(event, (q) => buyMember(${i}, q))" ${disabled}>${btnText}</button>
       </div>`;
   });
   setHTML("tab-member", html);
@@ -1131,7 +1152,7 @@ function renderShop() {
       btn.innerHTML = "쿨타임";
       btn.disabled = true;
     } else {
-      desc.innerText = `${BOOSTER_TIME}초 동안 모든 열매 ${b.power}배 (쿨타임 2분)`;
+      desc.innerText = `${BOOSTER_TIME}초 동안 모든 열매 ${b.power}배 (쿨타임 10초)`;
       btn.innerHTML = `구매<br>${fmt(price)}`;
       btn.disabled = game.berry < price;
     }
